@@ -5,6 +5,7 @@ import sys
 import rospy
 import cv2
 import numpy as np
+import vision as vis
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray, Float64
@@ -32,10 +33,21 @@ class image_converter:
       self.cv_image2 = self.bridge.imgmsg_to_cv2(data, "bgr8")
     except CvBridgeError as e:
       print(e)
-    # Uncomment if you want to save the image
-    #cv2.imwrite('image_copy.png', cv_image)
-    im2=cv2.imshow('window2', self.cv_image2)
-    cv2.waitKey(1)
+
+    orange_mask = cv2.inRange(self.cv_image2, (75, 100, 125), (90, 180, 220))
+    sphere_position = vis.find_target(orange_mask, vis.sphere_template)
+    print(vis.to_meters_ratio * sphere_position[1], vis.to_meters_ratio * sphere_position[0])  # distance of Z and of Y
+
+    ''' Visualize movement
+    yellow_mask = cv2.inRange(self.cv_image2, (0, 170, 170), (80, 255, 255))
+    base_frame = vis.detect_color(yellow_mask)
+    x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
+    y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
+    cv2.imshow('Visualization', orange_mask)
+    '''
+
+    # cv2.imshow('Original Cam ZY', self.cv_image2)
+    cv2.waitKey(3)
 
     # Publish the results
     try: 

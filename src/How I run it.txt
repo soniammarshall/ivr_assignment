@@ -1,0 +1,12 @@
+BEFORE ANYTHING:
+source devel/setup.sh
+
+LAUNCH PROJECT:
+roslaunch ivr_assignment spawn.launch
+
+RUN CODE:
+source temp-python/bin/activate
+rosrun ivr_assignment image1.py
+
+MOVE ROBOT:
+rostopic pub -1 /robot/joint1_position_controller/command std_msgs/Float64 “data: 1.0”
