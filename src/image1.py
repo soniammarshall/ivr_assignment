@@ -9,6 +9,7 @@ import numpy as np
 import vision as vis
 import matplotlib.pyplot as plt
 from std_msgs.msg import String
+from std_msgs.msg import Float64
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -23,6 +24,9 @@ class image_converter:
         self.image_pub1 = rospy.Publisher("image_topic1", Image, queue_size=1)
         # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
         self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.callback1)
+        # initialize publishers to publish target distance estimates for x and z
+        self.target_x_pub = rospy.Publisher("target_x_estimate", Float64, queue_size=10)
+        self.target_z_pub = rospy.Publisher("target_z_estimate", Float64, queue_size=10)
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
 
@@ -34,25 +38,31 @@ class image_converter:
         except CvBridgeError as e:
             print(e)
 
-        ''' Color masks (BGR)
+        # Color masks (BGR)
         # higher red & green to distinguish from orange
-        # yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
-        # blue_mask = cv2.inRange(self.cv_image1, (100, 0, 0), (255, 80, 80))
+        yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
+        blue_mask = cv2.inRange(self.cv_image1, (100, 0, 0), (255, 80, 80))
         # green_mask = cv2.inRange(self.cv_image1, (0, 100, 0), (80, 255, 80))
         # red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
-        '''
-
         orange_mask = cv2.inRange(self.cv_image1, (75, 100, 125), (90, 180, 220))
-        sphere_position = vis.find_target(orange_mask, vis.sphere_template)
-        print(vis.to_meters_ratio * sphere_position[1], vis.to_meters_ratio * sphere_position[0])  # distance of Z and of X
 
-        ''' Visualize movement
-        yellow_mask = cv2.inRange(self.cv_image2, (0, 170, 170), (80, 255, 255))
+        sphere_position = vis.find_target(orange_mask, vis.sphere_template)
+        # base position
         base_frame = vis.detect_color(yellow_mask)
-        x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
-        y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
-        cv2.imshow('Visualization', orange_mask)
-        '''
+        print("base:\t{}".format(base_frame))
+        print("sphere:\t{}".format(sphere_position))
+        # sphere distance relative to base
+        sphere_relative_distance = np.absolute(sphere_position - base_frame)
+        # distance of Z and X from base frame
+        x_distance = Float64()
+        z_distance = Float64()
+        x_distance.data = vis.to_meters_ratio * sphere_relative_distance[0]
+        z_distance.data = vis.to_meters_ratio * sphere_relative_distance[1]
+
+        # Visualize movement
+        # x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
+        # y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization ZX', orange_mask)
 
         # cv2.imshow('Original Cam ZX', self.cv_image1)
         cv2.waitKey(3)
@@ -60,6 +70,8 @@ class image_converter:
         # Publish the results
         try:
             self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
+            self.target_x_pub.publish(x_distance)
+            self.target_z_pub.publish(z_distance)
         except CvBridgeError as e:
             print(e)
 
