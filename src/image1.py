@@ -24,8 +24,8 @@ class image_converter:
         self.image_pub1 = rospy.Publisher("image_topic1", Image, queue_size=1)
         # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
         self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.callback1)
-        # initialize publishers to publish target distance estimates for x and z
-        self.target_x_pub = rospy.Publisher("target_x_estimate", Float64, queue_size=10)
+        # initialize publishers to publish target distance estimates for y and z
+        self.target_y_pub = rospy.Publisher("target_y_estimate", Float64, queue_size=10)
         self.target_z_pub = rospy.Publisher("target_z_estimate", Float64, queue_size=10)
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
@@ -53,24 +53,24 @@ class image_converter:
         print("sphere:\t{}".format(sphere_position))
         # sphere distance relative to base
         sphere_relative_distance = np.absolute(sphere_position - base_frame)
-        # distance of Z and X from base frame
-        x_distance = Float64()
+        # distance of Z and Y from base frame
+        y_distance = Float64()
         z_distance = Float64()
-        x_distance.data = vis.to_meters_ratio * sphere_relative_distance[0]
+        y_distance.data = vis.to_meters_ratio * sphere_relative_distance[0]
         z_distance.data = vis.to_meters_ratio * sphere_relative_distance[1]
 
         # Visualize movement
         # x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
         # y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
-        # cv2.imshow('Visualization ZX', orange_mask)
+        # cv2.imshow('Visualization ZY', orange_mask)
 
-        # cv2.imshow('Original Cam ZX', self.cv_image1)
+        # cv2.imshow('Original Cam ZY', self.cv_image1)
         cv2.waitKey(3)
 
         # Publish the results
         try:
             self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
-            self.target_x_pub.publish(x_distance)
+            self.target_y_pub.publish(y_distance)
             self.target_z_pub.publish(z_distance)
         except CvBridgeError as e:
             print(e)
