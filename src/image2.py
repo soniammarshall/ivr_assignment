@@ -28,11 +28,12 @@ class image_converter:
     self.target_z_pub = rospy.Publisher("target_z_estimate2", Float64, queue_size=10)
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
+    self.target_history = [0.0, 0.0]
 
 
   # Recieve data, process it, and publish
   def callback2(self,data):
-    # Recieve the image
+    # Receive the image
     try:
       self.cv_image2 = self.bridge.imgmsg_to_cv2(data, "bgr8")
     except CvBridgeError as e:
@@ -44,9 +45,14 @@ class image_converter:
     blue_mask = cv2.inRange(self.cv_image2, (100, 0, 0), (255, 80, 80))
     # green_mask = cv2.inRange(self.cv_image2, (0, 100, 0), (80, 255, 80))
     # red_mask = cv2.inRange(self.cv_image2, (0, 0, 100), (80, 80, 255))
-    orange_mask = cv2.inRange(self.cv_image2, (75, 100, 125), (90, 180, 220))
 
-    sphere_position = vis.find_target(orange_mask, vis.sphere_template)
+    orange_mask = cv2.inRange(self.cv_image2, (75, 100, 125), (90, 180, 220))
+    # This applies a dilate that makes the binary region smaller (the more iterations the smaller it becomes)
+    kernel = np.ones((5, 5), np.uint8)
+    orange_mask = cv2.erode(orange_mask, kernel, iterations=1)
+    orange_mask = cv2.dilate(orange_mask, kernel, iterations=1)
+
+    sphere_position = vis.find_target(orange_mask, vis.sphere_template, self.target_history)
     # base position
     base_frame = vis.detect_color(yellow_mask)
     print("base:\t{}".format(base_frame))
