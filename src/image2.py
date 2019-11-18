@@ -56,8 +56,8 @@ class image_converter:
     # distance of Z and X from base frame
     x_distance = Float64()
     z_distance = Float64()
-    x_distance.data = vis.to_meters_ratio * sphere_relative_distance[0]
-    z_distance.data = vis.to_meters_ratio * sphere_relative_distance[1]
+    x_distance.data = vis.to_meters_ratio_img2 * sphere_relative_distance[0]
+    z_distance.data = vis.to_meters_ratio_img2 * sphere_relative_distance[1]
 
     # Visualize movement
     # x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))

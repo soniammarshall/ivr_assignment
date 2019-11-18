@@ -3,7 +3,8 @@
 import cv2
 import numpy as np
 
-to_meters_ratio = 0.04165762736367134  # Precomputed with pixel2meter
+to_meters_ratio_img1 = 0.04165762736367134  # Precomputed with pixel2meter #04165762736367134
+to_meters_ratio_img2 = 0.04322367230736768  # Precomputed with pixel2meter
 sphere_template = cv2.imread("src/ivr_assignment/src/sphere.png", 0)
 
 # Detecting the centre of a colored circle
