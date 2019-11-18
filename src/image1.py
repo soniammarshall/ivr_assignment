@@ -29,6 +29,7 @@ class image_converter:
         self.target_z_pub = rospy.Publisher("target_z_estimate", Float64, queue_size=10)
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
+        self.target_history = [0.0, 0.0]
 
     # Receive data from camera 1, process it, and publish
     def callback1(self, data):
@@ -44,9 +45,14 @@ class image_converter:
         blue_mask = cv2.inRange(self.cv_image1, (100, 0, 0), (255, 80, 80))
         # green_mask = cv2.inRange(self.cv_image1, (0, 100, 0), (80, 255, 80))
         # red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
-        orange_mask = cv2.inRange(self.cv_image1, (75, 100, 125), (90, 180, 220))
 
-        sphere_position = vis.find_target(orange_mask, vis.sphere_template)
+        orange_mask = cv2.inRange(self.cv_image1, (75, 100, 125), (90, 180, 220))
+        # This applies a dilate that makes the binary region smaller (the more iterations the smaller it becomes)
+        kernel = np.ones((5, 5), np.uint8)
+        orange_mask = cv2.erode(orange_mask, kernel, iterations=1)
+        orange_mask = cv2.dilate(orange_mask, kernel, iterations=1)
+
+        sphere_position = vis.find_target(orange_mask, vis.sphere_template, self.target_history)
         # base position
         base_frame = vis.detect_color(yellow_mask)
         print("base:\t{}".format(base_frame))
@@ -60,11 +66,14 @@ class image_converter:
         z_distance.data = vis.to_meters_ratio_img1 * sphere_relative_distance[1]
 
         # Visualize movement
-        # x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
-        # y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
-        # cv2.imshow('Visualization ZY', orange_mask)
+        x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
+        y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
+        center_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], sphere_position[1]), color=(255, 255, 255))
+        cv2.imshow('Visualization ZY', orange_mask)
+        cv2.imshow('Visualization Yellow ZY', yellow_mask)
 
-        # cv2.imshow('Original Cam ZY', self.cv_image1)
+        #a = self.detect_joint_angles(cv_image)
+        cv2.imshow('Original Cam ZY', self.cv_image1)
         cv2.waitKey(3)
 
         # Publish the results
