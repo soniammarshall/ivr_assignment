@@ -43,8 +43,8 @@ class image_converter:
         # higher red & green to distinguish from orange
         yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
         blue_mask = cv2.inRange(self.cv_image1, (100, 0, 0), (255, 80, 80))
-        # green_mask = cv2.inRange(self.cv_image1, (0, 100, 0), (80, 255, 80))
-        # red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
+        green_mask = cv2.inRange(self.cv_image1, (0, 100, 0), (80, 255, 80))
+        red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
 
         orange_mask = cv2.inRange(self.cv_image1, (75, 100, 125), (90, 180, 220))
         # This applies a dilate that makes the binary region smaller (the more iterations the smaller it becomes)
@@ -66,13 +66,13 @@ class image_converter:
         z_distance.data = vis.to_meters_ratio_img1 * sphere_relative_distance[1]
 
         # Visualize movement
-        x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
-        y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
-        center_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], sphere_position[1]), color=(255, 255, 255))
-        cv2.imshow('Visualization ZY', orange_mask)
-        cv2.imshow('Visualization Yellow ZY', yellow_mask)
+        # x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
+        # y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
+        # center_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], sphere_position[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization ZY', orange_mask)
+        # cv2.imshow('Visualization Yellow ZY', yellow_mask)
 
-        #a = self.detect_joint_angles(cv_image)
+        a = vis.detect_joint_angles(yellow_mask, blue_mask, green_mask, red_mask, vis.to_meters_ratio_img1)
         cv2.imshow('Original Cam ZY', self.cv_image1)
         cv2.waitKey(3)
 

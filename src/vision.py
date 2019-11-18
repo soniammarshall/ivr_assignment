@@ -31,12 +31,12 @@ def pixel2meter(yellow_mask, blue_mask):
 
 
 # Calculate the relevant joint angles from the image
-def detect_joint_angles(self, yellow_mask, blue_mask, green_mask, red_mask, to_meters_ratio):
+def detect_joint_angles(yellow_mask, blue_mask, green_mask, red_mask, to_meters_ratio):
     # Obtain the centre of each coloured blob
-    base_joint = to_meters_ratio * self.detect_color(yellow_mask)
-    blue_joint = to_meters_ratio * self.detect_color(blue_mask)
-    green_joint = to_meters_ratio * self.detect_color(green_mask)
-    red_joint = to_meters_ratio * self.detect_color(red_mask)
+    base_joint = to_meters_ratio * detect_color(yellow_mask)
+    blue_joint = to_meters_ratio * detect_color(blue_mask)
+    green_joint = to_meters_ratio * detect_color(green_mask)
+    red_joint = to_meters_ratio * detect_color(red_mask)
 
     # Solve using trigonometry
     ja1 = np.arctan2(base_joint[0] - blue_joint[0], base_joint[1] - blue_joint[1])
