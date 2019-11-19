@@ -6,6 +6,7 @@ import numpy as np
 to_meters_ratio_img1 = 0.04165762736367134  # Precomputed with pixel2meter
 to_meters_ratio_img2 = 0.04322367230736768  # Precomputed with pixel2meter
 sphere_template = cv2.imread("src/ivr_assignment/src/sphere.png", 0)
+erode_dilate_kernel = np.ones((3, 3), np.uint8)
 
 # Detecting the centre of a colored circle
 def detect_color(mask):  # mask isolates the color in the image as a binary image
