@@ -26,6 +26,9 @@ class image_converter:
     # initialize publishers to publish target distance estimates for y and z
     self.target_x_pub = rospy.Publisher("target_x_estimate", Float64, queue_size=10)
     self.target_z_pub = rospy.Publisher("target_z_estimate2", Float64, queue_size=10)
+    # initialize publishers to publish end effector position estimates for x and z
+    self.end_effector_x_pub = rospy.Publisher("end_effector_x", Float64, queue_size=10)
+    self.end_effector_z_pub = rospy.Publisher("end_effector_z2", Float64, queue_size=10)
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
     self.target_history = [0.0, 0.0]
@@ -43,8 +46,8 @@ class image_converter:
     # higher red & green to distinguish from orange
     yellow_mask = cv2.inRange(self.cv_image2, (0, 170, 170), (80, 255, 255))
     blue_mask = cv2.inRange(self.cv_image2, (100, 0, 0), (255, 80, 80))
-    # green_mask = cv2.inRange(self.cv_image2, (0, 100, 0), (80, 255, 80))
-    # red_mask = cv2.inRange(self.cv_image2, (0, 0, 100), (80, 80, 255))
+    green_mask = cv2.inRange(self.cv_image2, (0, 100, 0), (80, 255, 80))
+    red_mask = cv2.inRange(self.cv_image2, (0, 0, 100), (80, 80, 255))
 
     orange_mask = cv2.inRange(self.cv_image2, (75, 100, 125), (90, 180, 220))
     # This applies a dilate that makes the binary region smaller (the more iterations the smaller it becomes)
@@ -55,8 +58,8 @@ class image_converter:
     sphere_position = vis.find_target(orange_mask, vis.sphere_template, self.target_history)
     # base position
     base_frame = vis.detect_color(yellow_mask)
-    print("base:\t{}".format(base_frame))
-    print("sphere:\t{}".format(sphere_position))
+    # print("base:\t{}".format(base_frame))
+    # print("sphere:\t{}".format(sphere_position))
     # sphere distance relative to base
     sphere_relative_distance = np.absolute(sphere_position - base_frame)
     # distance of Z and X from base frame
@@ -70,6 +73,14 @@ class image_converter:
     # y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
     # cv2.imshow('Visualization ZX', orange_mask)
 
+    # x, z position of the end effector (the centre of the red sphere)
+    end_effector_position = np.absolute(vis.detect_color(red_mask) - base_frame)
+    end_effector_x = Float64()
+    end_effector_z = Float64()
+    end_effector_x = vis.to_meters_ratio_img2 * end_effector_position[0]
+    end_effector_z = vis.to_meters_ratio_img2 * end_effector_position[1]
+    # print("vision x: {}, z: {}".format(end_effector_x, end_effector_z))
+
     #cv2.imshow('Original Cam ZX', self.cv_image2)
     cv2.waitKey(3)
 
@@ -78,6 +89,8 @@ class image_converter:
       self.image_pub2.publish(self.bridge.cv2_to_imgmsg(self.cv_image2, "bgr8"))
       self.target_x_pub.publish(x_distance)
       self.target_z_pub.publish(z_distance)
+      self.end_effector_x_pub.publish(end_effector_x)
+      self.end_effector_z_pub.publish(end_effector_z)
     except CvBridgeError as e:
       print(e)
 

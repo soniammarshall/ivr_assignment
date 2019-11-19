@@ -27,6 +27,9 @@ class image_converter:
         # initialize publishers to publish target distance estimates for y and z
         self.target_y_pub = rospy.Publisher("target_y_estimate", Float64, queue_size=10)
         self.target_z_pub = rospy.Publisher("target_z_estimate", Float64, queue_size=10)
+        # initialize publishers to publish end effector position estimates for y and z
+        self.end_effector_y_pub = rospy.Publisher("end_effector_y", Float64, queue_size=10)
+        self.end_effector_z_pub = rospy.Publisher("end_effector_z", Float64, queue_size=10)
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
         self.target_history = [0.0, 0.0]
@@ -55,8 +58,8 @@ class image_converter:
         sphere_position = vis.find_target(orange_mask, vis.sphere_template, self.target_history)
         # base position
         base_frame = vis.detect_color(yellow_mask)
-        print("base:\t{}".format(base_frame))
-        print("sphere:\t{}".format(sphere_position))
+        # print("base:\t{}".format(base_frame))
+        # print("sphere:\t{}".format(sphere_position))
         # sphere distance relative to base
         sphere_relative_distance = np.absolute(sphere_position - base_frame)
         # distance of Z and Y from base frame
@@ -72,6 +75,14 @@ class image_converter:
         # cv2.imshow('Visualization ZY', orange_mask)
         # cv2.imshow('Visualization Yellow ZY', yellow_mask)
 
+        # y, z position of the end effector (the centre of the red sphere)
+        end_effector_position = np.absolute(vis.detect_color(red_mask) - base_frame)
+        end_effector_y = Float64()
+        end_effector_z = Float64()
+        end_effector_y = vis.to_meters_ratio_img1 * end_effector_position[0]
+        end_effector_z = vis.to_meters_ratio_img1 * end_effector_position[1]
+        # print("vision y: {}, z: {}".format(end_effector_y, end_effector_z))
+
         a = vis.detect_joint_angles(yellow_mask, blue_mask, green_mask, red_mask, vis.to_meters_ratio_img1)
         cv2.imshow('Original Cam ZY', self.cv_image1)
         cv2.waitKey(3)
@@ -81,6 +92,8 @@ class image_converter:
             self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
             self.target_y_pub.publish(y_distance)
             self.target_z_pub.publish(z_distance)
+            self.end_effector_y_pub.publish(end_effector_y)
+            self.end_effector_z_pub.publish(end_effector_z)
         except CvBridgeError as e:
             print(e)
 
@@ -98,3 +111,4 @@ def main(args):
 # run the code if the node is called
 if __name__ == '__main__':
     main(sys.argv)
+
