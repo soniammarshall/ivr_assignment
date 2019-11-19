@@ -6,7 +6,6 @@ import numpy as np
 to_meters_ratio_img1 = 0.04165762736367134  # Precomputed with pixel2meter
 to_meters_ratio_img2 = 0.04322367230736768  # Precomputed with pixel2meter
 sphere_template = cv2.imread("src/ivr_assignment/src/sphere.png", 0)
-erode_dilate_kernel = np.ones((3, 3), np.uint8)
 
 # Detecting the centre of a colored circle
 def detect_color(mask):  # mask isolates the color in the image as a binary image
@@ -45,24 +44,3 @@ def detect_joint_angles(yellow_mask, blue_mask, green_mask, red_mask, to_meters_
     ja3 = np.arctan2(green_joint[0] - red_joint[0], green_joint[1] - red_joint[1]) - ja2 - ja1
 
     return np.array([ja1, ja2, ja3])
-
-def find_target(mask, template, target_history):
-    # Build template
-    w, h = template.shape[::-1]
-
-    # Apply template Matching
-    res = cv2.matchTemplate(mask, template, cv2.TM_CCOEFF)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-
-    # top_left = max_loc
-    # bottom_right = (top_left[0] + w, top_left[1] + h)
-    center = (max_loc[0] + w / 2, max_loc[1] + h / 2)
-
-    # To detect the box:
-    #box_template = cv2.imread("src/ivr_assignment/src/box.png", 0)
-    if max_val < 6800000:
-        return (target_history[0], target_history[1])
-
-    target_history[0] = center[0]
-    target_history[1] = center[1]
-    return np.array([center[0], center[1]])
