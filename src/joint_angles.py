@@ -23,8 +23,8 @@ class joint_angles:
         # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
         self.target_y_sub = rospy.Subscriber("/target_y_estimate", Float64, self.callback_y_update)
         self.target_x_sub = rospy.Subscriber("/target_x_estimate", Float64, self.callback_x_update)
-        self.target_y = 0.0
-        self.target_x = 0.0
+        self.target_y = Float64()
+        self.target_x = Float64()
         # initialize publishers to publish target distance estimates for y and z
         # self.target_y_pub = rospy.Publisher("target_y_estimate", Float64, queue_size=10)
         # self.target_z_pub = rospy.Publisher("target_z_estimate", Float64, queue_size=10)
@@ -32,14 +32,11 @@ class joint_angles:
     # Receive target data from both cameras, process it, and publish
     def callback_y_update(self, data):
         self.target_y = data
-        print(np.float64(self.target_y))
+        print(np.rad2deg(np.arctan2(self.target_x.data, self.target_y.data)))
 
     def callback_x_update(self, data):
         self.target_x = data
-        print(np.float64(self.target_x))
-
-    def find_arctan(self):
-        print(np.arctan2(self.target_x, self.target_y))
+        print(np.rad2deg(np.arctan2(self.target_x.data, self.target_y.data)))
 
 
 # call the class

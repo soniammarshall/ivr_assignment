@@ -55,8 +55,8 @@ class image_converter:
     sphere_position = vis.find_target(orange_mask, vis.sphere_template, self.target_history)
     # base position
     base_frame = vis.detect_color(yellow_mask)
-    print("base:\t{}".format(base_frame))
-    print("sphere:\t{}".format(sphere_position))
+    # print("base:\t{}".format(base_frame))
+    # print("sphere:\t{}".format(sphere_position))
     # sphere distance relative to base
     sphere_relative_distance = np.absolute(sphere_position - base_frame)
     # distance of Z and X from base frame
@@ -68,7 +68,11 @@ class image_converter:
     # Visualize movement
     # x_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], base_frame[1]), color=(255, 255, 255))
     # y_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
+    # center_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], sphere_position[1]), color=(255, 255, 255))
     # cv2.imshow('Visualization ZX', orange_mask)
+
+    green_mask = cv2.inRange(self.cv_image2, (0, 100, 0), (80, 255, 80))
+    print(vis.to_meters_ratio_img2 * vis.detect_color(yellow_mask) - vis.to_meters_ratio_img2 * vis.detect_color(green_mask))
 
     #cv2.imshow('Original Cam ZX', self.cv_image2)
     cv2.waitKey(3)
