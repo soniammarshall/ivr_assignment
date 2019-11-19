@@ -19,9 +19,9 @@ class target_estimator:
         self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.image1_callback)
         self.image_sub2 = rospy.Subscriber("/camera2/robot/image_raw", Image, self.image2_callback)
         # initialize publishers to publish target distance estimates for y and z
-        self.target_y_pub = rospy.Publisher("target_y_estimate", Float64, queue_size=10)
-        self.target_z_pub = rospy.Publisher("target_z_estimate", Float64, queue_size=10)
-        self.target_x_pub = rospy.Publisher("target_x_estimate", Float64, queue_size=10)
+        self.target_y_pub = rospy.Publisher("/target_y_estimate", Float64, queue_size=10)
+        self.target_z_pub = rospy.Publisher("/target_z_estimate", Float64, queue_size=10)
+        self.target_x_pub = rospy.Publisher("/target_x_estimate", Float64, queue_size=10)
         self.target_history = [0.0, 0.0, 0.0]
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
@@ -80,7 +80,7 @@ class target_estimator:
         # Publish the results
         self.target_y.data = vis.to_meters_ratio_img1 * sphere_relative_distance[0]
         self.target_z.data = vis.to_meters_ratio_img1 * sphere_relative_distance[1]
-        # print("Y={}, Z={}".format(self.target_y.data, self.target_z.data))
+        print("Y={}, Z={}".format(self.target_y.data, self.target_z.data))
         self.target_y_pub.publish(self.target_y)
         self.target_z_pub.publish(self.target_z)
 
@@ -111,7 +111,7 @@ class target_estimator:
         # Publish the results
         self.target_x = Float64()
         self.target_x.data = vis.to_meters_ratio_img2 * sphere_relative_distance[0]
-        # print("X={}".format(self.target_x.data))
+        print("X={}".format(self.target_x.data))
         self.target_x_pub.publish(self.target_x)
 
 
