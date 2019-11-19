@@ -1,18 +1,10 @@
 #!/usr/bin/env python
-import os
 
-import roslib
 import sys
 import rospy
 import cv2
 import numpy as np
-import vision as vis
-import matplotlib.pyplot as plt
-from std_msgs.msg import String
-from std_msgs.msg import Float64
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
-
+from std_msgs.msg import Float64MultiArray
 
 class forward_kinematics:
 
@@ -20,31 +12,23 @@ class forward_kinematics:
     def __init__(self):
         # initialize the node named image_processing
         rospy.init_node('forward_kinematics', anonymous=True)
-        # initialize subscribers to recieve messages from topics with end effector position
-        self.end_effector_subx = rospy.Subscriber("/end_effector_x", Float64, self.callback1)
-        self.end_effector_suby = rospy.Subscriber("/end_effector_y", Float64, self.callback2)
-        self.end_effector_subz = rospy.Subscriber("/end_effector_z", Float64, self.callback3)
-        self.end_effector_x = 0.0
-        self.end_effector_y = 0.0
-        self.end_effector_z = 0.0
+        # initialize a subscriber to get position of blobs
+        self.blob_sub = rospy.Subscriber("/blobs_pos", Float64MultiArray, self.callback)
+        self.blobs_history = np.array([0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0])
         self.joints = np.array([0, 0, 0, 0])
 
     # TODO when we have calculated joint angles change the subscribers to receive joint angles
     # TODO publish forward kinematics result to a topic
-    def callback1(self, msg):
-        self.end_effector_x = msg.data
-        print("x: {}".format(self.end_effector_x))
+    def callback(self, blobs):
+        if len(blobs.data) == 0:
+            received_blobs = self.blobs_history
+        else:
+            received_blobs = blobs.data
+            self.blobs_history = received_blobs
+
+        print("x: {}, y:{}, z:{}".format(received_blobs[9], received_blobs[10], received_blobs[11]))
         end_effector = self.calculate_fk(self.joints)
         print("FK x: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]))
-
-    def callback2(self, msg):
-        self.end_effector_y = msg.data
-        print("y: {}".format(self.end_effector_y))
-
-    def callback3(self, msg):
-        self.end_effector_z = msg.data
-        print("z: {}".format(self.end_effector_z))
-
 
     def calculate_fk(self, joints):
         x_e = np.sin(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2])) + np.cos(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2]))

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import sys
 import cv2
@@ -6,9 +7,9 @@ import rospy
 import numpy as np
 import vision as vis
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float64MultiArray
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64MultiArray, Float64
 from cv_bridge import CvBridge, CvBridgeError
+
 
 class blobs_estimator:
 
@@ -19,17 +20,13 @@ class blobs_estimator:
         # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
         self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.image1_callback)
         self.image_sub2 = rospy.Subscriber("/camera2/robot/image_raw", Image, self.image2_callback)
-        self.end_effector_y_pub = rospy.Publisher("/end_effector_y", Float64, queue_size=10)
-        self.end_effector_z_pub = rospy.Publisher("/end_effector_z", Float64, queue_size=10)
-        self.end_effector_x_pub = rospy.Publisher("/end_effector_x", Float64, queue_size=10)
         # initialize a publisher to publish position of blobs
-        self.blob_pub2 = rospy.Publisher("/blob_pos",Float64MultiArray, queue_size=10)
+        self.blob_pub = rospy.Publisher("/blobs_pos", Float64MultiArray, queue_size=10)
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
 
-        self.red_x = Float64()
-        self.red_y = Float64()
-        self.red_z = Float64()
+        self.blobs = Float64MultiArray()
+        self.blobs_history = np.array([0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0])
 
     def image1_callback(self, data):
         try:
@@ -39,17 +36,30 @@ class blobs_estimator:
 
         # Color masks (BGR)
         yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
+        green_mask = cv2.inRange(self.cv_image1, (0, 100, 0), (80, 255, 80))
         red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
 
-        # y, z position of the end effector (the centre of the red sphere)
-        base_frame = vis.detect_color(yellow_mask)
-        end_effector_position = np.absolute(vis.detect_color(red_mask) - base_frame)
-        self.red_y.data = vis.to_meters_ratio_img1 * end_effector_position[0]
-        self.red_z.data = vis.to_meters_ratio_img1 * end_effector_position[1]
+        # update y and z of blobs
+        # get the blob positions relative to the blue blob (blue at (0,0,0))
+        if len(self.blobs.data) == 0:
+            new_blobs = self.blobs_history
+        else:
+            new_blobs = self.blobs.data
+            self.blobs_history = new_blobs
 
-        print("Y={}, Z={}".format(self.red_y.data, self.red_z.data))
-        self.end_effector_y_pub.publish(self.red_y)
-        self.end_effector_z_pub.publish(self.red_z)
+        base_frame = vis.detect_color(yellow_mask)
+        new_green = base_frame - vis.detect_color(green_mask)
+        new_blobs[7] = vis.to_meters_ratio_img1 * new_green[0]
+        new_blobs[8] = vis.to_meters_ratio_img1 * new_green[1]
+
+        new_red = base_frame - vis.detect_color(red_mask)
+        new_blobs[10] = vis.to_meters_ratio_img1 * new_red[0]
+        new_blobs[11] = vis.to_meters_ratio_img1 * new_red[1]
+
+        self.blobs.data = new_blobs
+        self.blob_pub.publish(self.blobs)
+
+        print("YELLOW:{}, BLUE:{}, GREEN:{}, RED:{}".format([new_blobs[0], new_blobs[1], new_blobs[2]], [new_blobs[3], new_blobs[4], new_blobs[5]], [new_blobs[6], new_blobs[7], new_blobs[8]], [new_blobs[9], new_blobs[10], new_blobs[11]]), end='\r')
 
 
     def image2_callback(self, data):
@@ -59,16 +69,27 @@ class blobs_estimator:
             print(e)
 
         # Color masks (BGR)
-        yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
-        red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
+        yellow_mask = cv2.inRange(self.cv_image2, (0, 170, 170), (80, 255, 255))
+        green_mask = cv2.inRange(self.cv_image2, (0, 100, 0), (80, 255, 80))
+        red_mask = cv2.inRange(self.cv_image2, (0, 0, 100), (80, 80, 255))
 
-        # x position of the end effector (the centre of the red sphere)
+        # update x of blobs
+        # get the blob positions relative to the blue blob (blue at (0,0,0))
+        if len(self.blobs.data) == 0:
+            new_blobs = self.blobs_history
+        else:
+            new_blobs = self.blobs.data
+            self.blobs_history = new_blobs
+
         base_frame = vis.detect_color(yellow_mask)
-        end_effector_position = np.absolute(vis.detect_color(red_mask) - base_frame)
-        self.red_x.data = vis.to_meters_ratio_img2 * end_effector_position[0]
+        new_green = base_frame - vis.detect_color(green_mask)
+        new_blobs[6] = vis.to_meters_ratio_img2 * new_green[0]
 
-        print("X={}".format(self.red_x.data))
-        self.end_effector_x_pub.publish(self.red_x)
+        new_red = base_frame - vis.detect_color(red_mask)
+        new_blobs[9] = vis.to_meters_ratio_img2 * new_red[0]
+
+        self.blobs.data = new_blobs
+        self.blob_pub.publish(self.blobs)
 
 
 # call the class

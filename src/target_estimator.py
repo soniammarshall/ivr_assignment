@@ -44,7 +44,10 @@ class target_estimator:
         # To detect the box:
         # box_template = cv2.imread("src/ivr_assignment/src/box.png", 0)
         if max_val < 6800000:
-            return target_history
+            if zy:
+                return np.array([target_history[1], target_history[2]])
+            else:
+                return np.array([target_history[0], target_history[2]])
 
         if zy:
             target_history[1] = center[0]
@@ -75,6 +78,7 @@ class target_estimator:
         # z_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
         # center_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], sphere_position[1]), color=(255, 255, 255))
         # cv2.imshow('Visualization Image 1, Target ZY', orange_mask)
+        # cv2.imshow('Original Image 1, Target ZY', self.cv_image1)
         # cv2.waitKey(3)
 
         # Publish the results
