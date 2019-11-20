@@ -64,13 +64,12 @@ class target_estimator:
 
         # IMAGE 1
         # Color masks (BGR)
-        yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
         orange_mask = cv2.inRange(self.cv_image1, (75, 100, 125), (90, 180, 220))
         kernel = np.ones((3, 3), np.uint8)
         orange_mask = cv2.erode(orange_mask, kernel, iterations=1)
         orange_mask = cv2.dilate(orange_mask, kernel, iterations=1)
         sphere_position = self.find_target(orange_mask, vis.sphere_template, self.target_history, True)
-        base_frame = vis.detect_color(yellow_mask)
+        base_frame = vis.yellow_blob_center_img1
         sphere_relative_distance = np.absolute(sphere_position - base_frame)
 
         # Visualize movement of target
@@ -96,13 +95,12 @@ class target_estimator:
         except CvBridgeError as e:
             print(e)
 
-        yellow_mask = cv2.inRange(self.cv_image2, (0, 170, 170), (80, 255, 255))
         orange_mask = cv2.inRange(self.cv_image2, (75, 100, 125), (90, 180, 220))
         kernel = np.ones((2, 2), np.uint8)
         orange_mask = cv2.erode(orange_mask, kernel, iterations=1)
         orange_mask = cv2.dilate(orange_mask, kernel, iterations=1)
         sphere_position = self.find_target(orange_mask, vis.sphere_template, self.target_history, False)
-        base_frame = vis.detect_color(yellow_mask)
+        base_frame = vis.yellow_blob_center_img2
         sphere_relative_distance = np.absolute(sphere_position - base_frame)
 
         # Visualize movement of target
@@ -110,6 +108,7 @@ class target_estimator:
         # z_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (base_frame[0], sphere_position[1]), color=(255, 255, 255))
         # center_line = cv2.line(orange_mask, (base_frame[0], base_frame[1]), (sphere_position[0], sphere_position[1]), color=(255, 255, 255))
         # cv2.imshow('Visualization Image 2, Target ZX', orange_mask)
+        # # cv2.imshow('Visualization Image 2, Yellow Blob ZX', yellow_mask)
         # cv2.waitKey(3)
 
         # Publish the results

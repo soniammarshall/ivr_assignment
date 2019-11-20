@@ -35,7 +35,7 @@ class blobs_estimator:
             print(e)
 
         # Color masks (BGR)
-        yellow_mask = cv2.inRange(self.cv_image1, (0, 170, 170), (80, 255, 255))
+        # blue_mask = cv2.inRange(self.cv_image1, (100, 0, 0), (255, 80, 80))
         green_mask = cv2.inRange(self.cv_image1, (0, 100, 0), (80, 255, 80))
         red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
 
@@ -46,13 +46,13 @@ class blobs_estimator:
             new_blobs = self.blobs.data
             self.blobs_history = new_blobs
 
-        base_frame = vis.detect_color(yellow_mask)
-        green_detected = vis.detect_color(green_mask)
+        base_frame = vis.yellow_blob_center_img1
+        green_detected = vis.detect_blob_center(green_mask)
         relative_green = base_frame - green_detected
         new_blobs[7] = vis.to_meters_ratio_img1 * relative_green[0]
         new_blobs[8] = vis.to_meters_ratio_img1 * relative_green[1]
 
-        red_detected = vis.detect_color(red_mask)
+        red_detected = vis.detect_blob_center(red_mask)
         relative_red = base_frame - red_detected
         new_blobs[10] = vis.to_meters_ratio_img1 * relative_red[0]
         new_blobs[11] = vis.to_meters_ratio_img1 * relative_red[1]
@@ -76,7 +76,7 @@ class blobs_estimator:
         # # cv2.imshow('Original Image 1, Target ZY', self.cv_image1)
         # cv2.waitKey(3)
 
-        # print("YE:({0:.1f}, {1:0.2f}, {2:.2f}), BL:({3:.2f}, {4:.2f}, {5:.2f}), GR:({6:.2f}, {7:.2f}, {8:.2f}), RE:({9:.2f}, {10:.2f}, {11:.2f})".format(new_blobs[0], new_blobs[1], new_blobs[2], new_blobs[3], new_blobs[4], new_blobs[5], new_blobs[6], new_blobs[7], new_blobs[8], new_blobs[9], new_blobs[10], new_blobs[11]), end='\r')
+        print("YE:({0:.1f}, {1:0.2f}, {2:.2f}), BL:({3:.2f}, {4:.2f}, {5:.2f}), GR:({6:.2f}, {7:.2f}, {8:.2f}), RE:({9:.2f}, {10:.2f}, {11:.2f})".format(new_blobs[0], new_blobs[1], new_blobs[2], new_blobs[3], new_blobs[4], new_blobs[5], new_blobs[6], new_blobs[7], new_blobs[8], new_blobs[9], new_blobs[10], new_blobs[11]), end='\r')
 
 
     def image2_callback(self, data):
@@ -86,7 +86,7 @@ class blobs_estimator:
             print(e)
 
         # Color masks (BGR)
-        yellow_mask = cv2.inRange(self.cv_image2, (0, 170, 170), (80, 255, 255))
+        # blue_mask = cv2.inRange(self.cv_image1, (100, 0, 0), (255, 80, 80))
         green_mask = cv2.inRange(self.cv_image2, (0, 100, 0), (80, 255, 80))
         red_mask = cv2.inRange(self.cv_image2, (0, 0, 100), (80, 80, 255))
 
@@ -98,12 +98,12 @@ class blobs_estimator:
             new_blobs = self.blobs.data
             self.blobs_history = new_blobs
 
-        base_frame = vis.detect_color(yellow_mask)
-        green_detected = vis.detect_color(green_mask)
+        base_frame = vis.yellow_blob_center_img2
+        green_detected = vis.detect_blob_center(green_mask)
         relative_green = base_frame - green_detected
         new_blobs[6] = vis.to_meters_ratio_img2 * relative_green[0]
 
-        red_detected = vis.detect_color(red_mask)
+        red_detected = vis.detect_blob_center(red_mask)
         relative_red = base_frame - red_detected
         new_blobs[9] = vis.to_meters_ratio_img2 * relative_red[0]
 
