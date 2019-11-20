@@ -29,7 +29,6 @@ def pixel2meter(yellow_mask, blue_mask):
     dist = np.sum((yellow_joint - blue_joint) ** 2)
     return 2 / np.sqrt(dist)  # link between yellow and blue is 2 meters
 
-
 # Calculate the relevant joint angles from the image
 def detect_joint_angles(yellow_mask, blue_mask, green_mask, red_mask, to_meters_ratio):
     # Obtain the centre of each coloured blob

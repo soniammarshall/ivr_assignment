@@ -14,8 +14,8 @@ class forward_kinematics:
         rospy.init_node('forward_kinematics', anonymous=True)
         # initialize a subscriber to get position of blobs
         self.blob_sub = rospy.Subscriber("/blobs_pos", Float64MultiArray, self.callback)
-        self.blobs_history = np.array([0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0])
-        self.joints = np.array([0, 0, 0, 0])
+        self.blobs_history = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        self.joints = np.array([0.0, 0.0, 0.0, 0.0])
 
     # TODO when we have calculated joint angles change the subscribers to receive joint angles
     # TODO publish forward kinematics result to a topic

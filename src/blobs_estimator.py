@@ -26,7 +26,7 @@ class blobs_estimator:
         self.bridge = CvBridge()
 
         self.blobs = Float64MultiArray()
-        self.blobs_history = np.array([0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0])
+        self.blobs_history = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
     def image1_callback(self, data):
         try:
@@ -40,7 +40,6 @@ class blobs_estimator:
         red_mask = cv2.inRange(self.cv_image1, (0, 0, 100), (80, 80, 255))
 
         # update y and z of blobs
-        # get the blob positions relative to the blue blob (blue at (0,0,0))
         if len(self.blobs.data) == 0:
             new_blobs = self.blobs_history
         else:
@@ -48,18 +47,36 @@ class blobs_estimator:
             self.blobs_history = new_blobs
 
         base_frame = vis.detect_color(yellow_mask)
-        new_green = base_frame - vis.detect_color(green_mask)
-        new_blobs[7] = vis.to_meters_ratio_img1 * new_green[0]
-        new_blobs[8] = vis.to_meters_ratio_img1 * new_green[1]
+        green_detected = vis.detect_color(green_mask)
+        relative_green = base_frame - green_detected
+        new_blobs[7] = vis.to_meters_ratio_img1 * relative_green[0]
+        new_blobs[8] = vis.to_meters_ratio_img1 * relative_green[1]
 
-        new_red = base_frame - vis.detect_color(red_mask)
-        new_blobs[10] = vis.to_meters_ratio_img1 * new_red[0]
-        new_blobs[11] = vis.to_meters_ratio_img1 * new_red[1]
+        red_detected = vis.detect_color(red_mask)
+        relative_red = base_frame - red_detected
+        new_blobs[10] = vis.to_meters_ratio_img1 * relative_red[0]
+        new_blobs[11] = vis.to_meters_ratio_img1 * relative_red[1]
 
         self.blobs.data = new_blobs
         self.blob_pub.publish(self.blobs)
 
-        print("YELLOW:{}, BLUE:{}, GREEN:{}, RED:{}".format([new_blobs[0], new_blobs[1], new_blobs[2]], [new_blobs[3], new_blobs[4], new_blobs[5]], [new_blobs[6], new_blobs[7], new_blobs[8]], [new_blobs[9], new_blobs[10], new_blobs[11]]), end='\r')
+        # Visualize green blob
+        # y_line = cv2.line(green_mask, (base_frame[0], base_frame[1]), (green_detected[0], base_frame[1]), color=(255, 255, 255))
+        # z_line = cv2.line(green_mask, (base_frame[0], base_frame[1]), (base_frame[0], green_detected[1]), color=(255, 255, 255))
+        # center_line = cv2.line(green_mask, (base_frame[0], base_frame[1]), (green_detected[0], green_detected[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization Image 1, Target ZY, Green Blob', green_mask)
+        # # cv2.imshow('Original Image 1, Target ZY', self.cv_image1)
+        # cv2.waitKey(3)
+
+        # Visualize red blob
+        # y_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], base_frame[1]), color=(255, 255, 255))
+        # z_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (base_frame[0], red_detected[1]), color=(255, 255, 255))
+        # center_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], red_detected[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization Image 1, Target ZY, Red Blob', red_mask)
+        # # cv2.imshow('Original Image 1, Target ZY', self.cv_image1)
+        # cv2.waitKey(3)
+
+        # print("YE:({0:.1f}, {1:0.2f}, {2:.2f}), BL:({3:.2f}, {4:.2f}, {5:.2f}), GR:({6:.2f}, {7:.2f}, {8:.2f}), RE:({9:.2f}, {10:.2f}, {11:.2f})".format(new_blobs[0], new_blobs[1], new_blobs[2], new_blobs[3], new_blobs[4], new_blobs[5], new_blobs[6], new_blobs[7], new_blobs[8], new_blobs[9], new_blobs[10], new_blobs[11]), end='\r')
 
 
     def image2_callback(self, data):
@@ -82,15 +99,32 @@ class blobs_estimator:
             self.blobs_history = new_blobs
 
         base_frame = vis.detect_color(yellow_mask)
-        new_green = base_frame - vis.detect_color(green_mask)
-        new_blobs[6] = vis.to_meters_ratio_img2 * new_green[0]
+        green_detected = vis.detect_color(green_mask)
+        relative_green = base_frame - green_detected
+        new_blobs[6] = vis.to_meters_ratio_img2 * relative_green[0]
 
-        new_red = base_frame - vis.detect_color(red_mask)
-        new_blobs[9] = vis.to_meters_ratio_img2 * new_red[0]
+        red_detected = vis.detect_color(red_mask)
+        relative_red = base_frame - red_detected
+        new_blobs[9] = vis.to_meters_ratio_img2 * relative_red[0]
+
+        # Visualize green blob
+        # x_line = cv2.line(green_mask, (base_frame[0], base_frame[1]), (green_detected[0], base_frame[1]), color=(255, 255, 255))
+        # z_line = cv2.line(green_mask, (base_frame[0], base_frame[1]), (base_frame[0], green_detected[1]), color=(255, 255, 255))
+        # center_line = cv2.line(green_mask, (base_frame[0], base_frame[1]), (green_detected[0], green_detected[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization Image 1, Target ZX, Green Blob', green_mask)
+        # # cv2.imshow('Original Image 1, Target ZY', self.cv_image2)
+        # cv2.waitKey(3)
+
+        # Visualize red blob
+        # x_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], base_frame[1]), color=(255, 255, 255))
+        # z_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (base_frame[0], red_detected[1]), color=(255, 255, 255))
+        # center_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], red_detected[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization Image 1, Target ZY, Red Blob', red_mask)
+        # # cv2.imshow('Original Image 1, Target ZX', self.cv_image2)
+        # cv2.waitKey(3)
 
         self.blobs.data = new_blobs
         self.blob_pub.publish(self.blobs)
-
 
 # call the class
 def main(args):
