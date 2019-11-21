@@ -55,13 +55,13 @@ class joint_angles_estimator:
 
     def measure_angles(self):
         # Descends in the angle space towards the minimum error, minimizing the error function and finding theta 1, 2 and 3
-        theta_num = minimize(self.error_fct, self.joint_angles_history[:-1], method='nelder-mead', options={'xtol': 1e-6})
-        return theta_num.x
+        joint_angles = minimize(self.error_fct, self.joint_angles_history[:-1], method='nelder-mead', options={'xtol': 1e-6})
+        return joint_angles.x
 
 
 # call the class
 def main(args):
-    joint_angles_estimator()
+    ja = joint_angles_estimator()
     try:
         rospy.spin()
     except KeyboardInterrupt:

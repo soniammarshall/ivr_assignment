@@ -14,11 +14,14 @@ class forward_kinematics:
         rospy.init_node('forward_kinematics', anonymous=True)
         # initialize a subscriber to get position of blobs
         self.blob_sub = rospy.Subscriber("/blobs_pos", Float64MultiArray, self.callback)
+        # initialize a publisher to publish the end effector position calculated by FK
+        self.end_effector_pub = rospy.Publisher("/end_effector_position", Float64MultiArray, queue_size=10)
+        self.end_effector_position = Float64MultiArray()
         self.blobs_history = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        # input the joint angles here for which you want to calculate FK
         self.joints = np.array([0.0, 0.0, 0.0, 0.0])
 
-    # TODO when we have calculated joint angles change the subscribers to receive joint angles
-    # TODO publish forward kinematics result to a topic
+
     def callback(self, blobs):
         if len(blobs.data) == 0:
             received_blobs = self.blobs_history
@@ -26,9 +29,11 @@ class forward_kinematics:
             received_blobs = blobs.data
             self.blobs_history = received_blobs
 
-        print("x: {}, y:{}, z:{}".format(received_blobs[9], received_blobs[10], received_blobs[11]))
+        print("Vision\tx: {}, y:{}, z:{}".format(received_blobs[9], received_blobs[10], received_blobs[11]))
         end_effector = self.calculate_fk(self.joints)
-        print("FK x: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]))
+        print("FK\tx: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]))
+        self.end_effector_position.data = end_effector
+        self.end_effector_pub.publish(self.end_effector_position)
 
     def calculate_fk(self, joints):
         x_e = np.sin(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2])) + np.cos(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2]))

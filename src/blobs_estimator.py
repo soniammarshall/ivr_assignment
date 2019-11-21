@@ -128,7 +128,7 @@ class blobs_estimator:
 
 # call the class
 def main(args):
-    blobs_estimator()
+    be = blobs_estimator()
     try:
         rospy.spin()
     except KeyboardInterrupt:

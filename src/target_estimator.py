@@ -120,7 +120,7 @@ class target_estimator:
 
 # call the class
 def main(args):
-    target_estimator()
+    te = target_estimator()
     try:
         rospy.spin()
     except KeyboardInterrupt:

@@ -31,18 +31,3 @@ def pixel2meter(yellow_mask, blue_mask):
     # find the distance between two circles
     dist = np.sum((yellow_joint - blue_joint) ** 2)
     return 2 / np.sqrt(dist)  # link between yellow and blue is 2 meters
-
-# Calculate the relevant joint angles from the image
-def detect_joint_angles(yellow_mask, blue_mask, green_mask, red_mask, to_meters_ratio):
-    # Obtain the centre of each coloured blob
-    base_joint = to_meters_ratio * detect_blob_center(yellow_mask)
-    blue_joint = to_meters_ratio * detect_blob_center(blue_mask)
-    green_joint = to_meters_ratio * detect_blob_center(green_mask)
-    red_joint = to_meters_ratio * detect_blob_center(red_mask)
-
-    # Solve using trigonometry
-    ja1 = np.arctan2(base_joint[0] - blue_joint[0], base_joint[1] - blue_joint[1])
-    ja2 = np.arctan2(blue_joint[0] - green_joint[0], blue_joint[1] - green_joint[1]) - ja1
-    ja3 = np.arctan2(green_joint[0] - red_joint[0], green_joint[1] - red_joint[1]) - ja2 - ja1
-
-    return np.array([ja1, ja2, ja3])
