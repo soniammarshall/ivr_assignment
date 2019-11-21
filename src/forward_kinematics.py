@@ -19,7 +19,7 @@ class forward_kinematics:
         self.end_effector_position = Float64MultiArray()
         self.blobs_history = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         # input the joint angles here for which you want to calculate FK
-        self.joints = np.array([0.0, 0.0, 0.0, 0.0])
+        self.joints = np.array([0.5, 0.5, 0.5, 0.5])
 
 
     def callback(self, blobs):
@@ -34,11 +34,27 @@ class forward_kinematics:
         print("FK\tx: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]))
         self.end_effector_position.data = end_effector
         self.end_effector_pub.publish(self.end_effector_position)
+        end_effector_new = self.calculate_fk_new(self.joints)
+        print("New FK\tx: {}, y: {}, z: {}".format(end_effector_new[0], end_effector_new[1], end_effector_new[2]))
 
     def calculate_fk(self, joints):
+        # uses first set of DH params
         x_e = np.sin(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2])) + np.cos(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2]))
         y_e = np.sin(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2])) - np.cos(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2]))
         z_e = np.cos(joints[1]) * np.sin(joints[2]) * (2 * np.cos(joints[3] + 3)) + 2 * (np.sin(joints[3]) * np.cos(joints[1]) * np.cos(joints[2]) + 1)
+        end_effector = np.array([x_e, y_e, z_e])
+        return end_effector
+    
+    
+    def calculate_fk_new(self, joints):
+        # uses second set of DH params
+        x_e = np.cos(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3) - np.sin(joints[0]) * np.sin(joints[2]) * (2 * np.cos(joints[3]) + 3) - 2 * np.sin(joints[1]) * np.sin(joints[3]) * np.cos(joints[0])
+        y_e = np.sin(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3) + np.sin(joints[2]) * np.cos(joints[0]) * (2 * np.cos(joints[3]) + 3) - 2 * np.sin(joints[0]) * np.sin(joints[1]) * np.sin(joints[3])
+        z_e = 2 * (1 - np.sin(joints[3]) * np.cos(joints[1])) - np.sin(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3)
+        # green joint pos:
+        # x_e = 3 * np.cos(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) - 3 * np.sin(joints[0]) * np.sin(joints[2])
+        # y_e = 3 * np.sin(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) + 3 * np.cos(joints[0]) * np.sin(joints[2])
+        # z_e = - (3 * np.sin(joints[1]) * np.cos(joints[2])) + 2
         end_effector = np.array([x_e, y_e, z_e])
         return end_effector
 

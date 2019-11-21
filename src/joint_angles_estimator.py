@@ -54,7 +54,11 @@ class joint_angles_estimator:
         # print("blue: {},  green: {}, blue_to_green: {}".format(blue, green, blue_to_green), end='\r')
 
         # return error which is to be minimized
-        return abs(c1 * c3 + s1 * s2 * s3 - blue_to_green[0]) + abs(s1 * c3 - c1 * s2 * s3 - blue_to_green[1]) + abs(c2 * s3 - blue_to_green[2])
+
+        # to be used with first set of DH params
+        # return abs(c1 * c3 + s1 * s2 * s3 - blue_to_green[0]) + abs(s1 * c3 - c1 * s2 * s3 - blue_to_green[1]) + abs(c2 * s3 - blue_to_green[2])
+        # to be used with second set of DH params
+        return abs(c1 * c2 * c3 - s1 * s3 - blue_to_green[0]) + abs(s1 * c2 * c3 + c1 * s3 - blue_to_green[1]) + abs(-(s2 * c3) - blue_to_green[2])
 
     def measure_angles(self):
         # Descends in the angle space towards the minimum error, minimizing the error function and finding theta 1, 2 and 3
