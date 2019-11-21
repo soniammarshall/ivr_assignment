@@ -6,7 +6,7 @@ import rospy
 import numpy as np
 import vision as vis
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Float64MultiArray
 from cv_bridge import CvBridge, CvBridgeError
 
 class target_estimator:
@@ -18,10 +18,11 @@ class target_estimator:
         # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
         self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.image1_callback)
         self.image_sub2 = rospy.Subscriber("/camera2/robot/image_raw", Image, self.image2_callback)
-        # initialize publishers to publish target distance estimates for y and z
-        self.target_y_pub = rospy.Publisher("/target_y_estimate", Float64, queue_size=10)
-        self.target_z_pub = rospy.Publisher("/target_z_estimate", Float64, queue_size=10)
-        self.target_x_pub = rospy.Publisher("/target_x_estimate", Float64, queue_size=10)
+        # initialize publisher to publish target position estimate [x, y, z]
+        self.target_position_pub = rospy.Publisher("/target_position_estimate", Float64MultiArray, queue_size=10)
+        self.target_position = Float64MultiArray()
+        self.target_position.data = [0.0, 0.0, 0.0]
+
         self.target_history = [0.0, 0.0, 0.0]
         # initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
@@ -81,12 +82,10 @@ class target_estimator:
         # cv2.waitKey(3)
 
         # Publish the results
-        self.target_y.data = vis.to_meters_ratio_img1 * sphere_relative_distance[0]
-        self.target_z.data = vis.to_meters_ratio_img1 * sphere_relative_distance[1]
-        # print("Y={}, Z={}".format(self.target_y.data, self.target_z.data))
-        self.target_y_pub.publish(self.target_y)
-        self.target_z_pub.publish(self.target_z)
-
+        self.target_position.data[1] = vis.to_meters_ratio_img1 * sphere_relative_distance[0]
+        self.target_position.data[2] = vis.to_meters_ratio_img1 * sphere_relative_distance[1]
+        print("Y={}, Z={}".format(self.target_position.data[1], self.target_position.data[2]))
+        self.target_position_pub.publish(self.target_position)
 
 
     def image2_callback(self, data):
@@ -112,10 +111,9 @@ class target_estimator:
         # cv2.waitKey(3)
 
         # Publish the results
-        self.target_x = Float64()
-        self.target_x.data = vis.to_meters_ratio_img2 * sphere_relative_distance[0]
-        # print("X={}".format(self.target_x.data))
-        self.target_x_pub.publish(self.target_x)
+        self.target_position.data[0] = vis.to_meters_ratio_img2 * sphere_relative_distance[0]
+        print("X={}".format(self.target_position.data[0]))
+        self.target_position_pub.publish(self.target_position)
 
 
 # call the class
