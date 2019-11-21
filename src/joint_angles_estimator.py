@@ -5,7 +5,7 @@ import sys
 import rospy
 import numpy as np
 from std_msgs.msg import Float64, Float64MultiArray
-from scipy.optimize import minimize
+from scipy.optimize import minimize, least_squares
 
 class joint_angles_estimator:
 
@@ -44,18 +44,23 @@ class joint_angles_estimator:
         s3 = np.sin(theta[2])
         c3 = np.cos(theta[2])
 
-        blue = np.array([self.blobs_history[6], self.blobs_history[7], self.blobs_history[8]])
-        green = np.array([self.blobs_history[3], self.blobs_history[4], self.blobs_history[5]])
+        blue = np.array([self.blobs_history[3], self.blobs_history[4], self.blobs_history[5]])
+        green = np.array([self.blobs_history[6], self.blobs_history[7], self.blobs_history[8]])
 
-        blue_to_green = blue - green
+        blue_to_green = green - blue
+        # print("blue: {},  green: {}, blue_to_green: {}".format(blue, green, blue_to_green), end='\r')
+        blue_to_green[0] = - blue_to_green[0]
         blue_to_green = blue_to_green / np.linalg.norm(blue_to_green)
+        # print("blue: {},  green: {}, blue_to_green: {}".format(blue, green, blue_to_green), end='\r')
 
         # return error which is to be minimized
         return abs(c1 * c3 + s1 * s2 * s3 - blue_to_green[0]) + abs(s1 * c3 - c1 * s2 * s3 - blue_to_green[1]) + abs(c2 * s3 - blue_to_green[2])
 
     def measure_angles(self):
         # Descends in the angle space towards the minimum error, minimizing the error function and finding theta 1, 2 and 3
-        joint_angles = minimize(self.error_fct, self.joint_angles_history[:-1], method='nelder-mead', options={'xtol': 1e-6})
+        # joint_angles = minimize(self.error_fct, np.array([0.5, 0.5, 0.5]), method='nelder-mead', options={'xtol': 1e-6})
+        joint_angles = least_squares(self.error_fct, np.array([0.5, 0.5, 0.3]), bounds=(0, 1))
+        # self.joint_angles_history[:-1]
         return joint_angles.x
 
 
