@@ -37,6 +37,7 @@ class forward_kinematics:
         end_effector_new = self.calculate_fk_new(self.joints)
         print("New FK\tx: {}, y: {}, z: {}".format(end_effector_new[0], end_effector_new[1], end_effector_new[2]))
 
+
     def calculate_fk(self, joints):
         # uses first set of DH params
         x_e = np.sin(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2])) + np.cos(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2]))
