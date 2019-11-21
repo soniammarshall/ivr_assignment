@@ -49,7 +49,6 @@ class joint_angles_estimator:
 
         blue_to_green = green - blue
         # print("blue: {},  green: {}, blue_to_green: {}".format(blue, green, blue_to_green), end='\r')
-        blue_to_green[0] = - blue_to_green[0]
         blue_to_green = blue_to_green / np.linalg.norm(blue_to_green)
         # print("blue: {},  green: {}, blue_to_green: {}".format(blue, green, blue_to_green), end='\r')
 
@@ -62,7 +61,6 @@ class joint_angles_estimator:
 
     def measure_angles(self):
         # Descends in the angle space towards the minimum error, minimizing the error function and finding theta 1, 2 and 3
-        # joint_angles = minimize(self.error_fct, np.array([0.5, 0.5, 0.5]), method='nelder-mead', options={'xtol': 1e-6})
         joint_angles = least_squares(self.error_fct, np.array([0.5, 0.5, 0.3]), bounds=(0, 1))
         # self.joint_angles_history[:-1]
         return joint_angles.x
