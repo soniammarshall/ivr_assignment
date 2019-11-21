@@ -6,7 +6,7 @@ import numpy as np
 to_meters_ratio_img1 = 0.04080782932503862  # Precomputed with vis.pixel2meter(yellow_mask, blue_mask) in image 1
 to_meters_ratio_img2 = 0.04311306135592269  # Precomputed with vis.pixel2meter(yellow_mask, blue_mask) in image 2
 # Precomputed with detect_blob_center(cv2.inRange(self.cv_image2, (0, 100, 100), (80, 255, 255))) in image 2, when orange sphere was not interfering
-yellow_blob_center_img2 = np.array([416, 533])
+yellow_blob_center_img2 = np.array([399, 533])
 yellow_blob_center_img1 = np.array([399, 533])
 sphere_template = cv2.imread("src/ivr_assignment/src/sphere.png", 0)
 

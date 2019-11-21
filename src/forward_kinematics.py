@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import sys
 import rospy
@@ -18,8 +19,9 @@ class forward_kinematics:
         self.end_effector_pub = rospy.Publisher("/end_effector_position", Float64MultiArray, queue_size=10)
         self.end_effector_position = Float64MultiArray()
         self.blobs_history = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        self.pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421
         # input the joint angles here for which you want to calculate FK
-        self.joints = np.array([0.5, 0.5, 0.5, 0.5])
+        self.joints = np.array([0.0, self.pi/2, 0.0, 0.0])
 
 
     def callback(self, blobs):
@@ -29,25 +31,32 @@ class forward_kinematics:
             received_blobs = blobs.data
             self.blobs_history = received_blobs
 
-        print("Vision\tx: {}, y:{}, z:{}".format(received_blobs[9], received_blobs[10], received_blobs[11]))
+        # print("Vision\tx: {}, y:{}, z:{}".format(received_blobs[9], received_blobs[10], received_blobs[11]), end='\r')
         end_effector = self.calculate_fk(self.joints)
-        print("FK\tx: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]))
+        print("FK\tx: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]), end='\r')
         self.end_effector_position.data = end_effector
         self.end_effector_pub.publish(self.end_effector_position)
-        end_effector_new = self.calculate_fk_new(self.joints)
-        print("New FK\tx: {}, y: {}, z: {}".format(end_effector_new[0], end_effector_new[1], end_effector_new[2]))
+        # end_effector_new = self.calculate_fk_version2_wrong(self.joints)
+        # print("New FK\tx: {}, y: {}, z: {}".format(end_effector_new[0], end_effector_new[1], end_effector_new[2]))
 
 
     def calculate_fk(self, joints):
-        # uses first set of DH params
-        x_e = np.sin(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2])) + np.cos(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2]))
-        y_e = np.sin(joints[0]) * (2 * np.cos(joints[2] + joints[3]) + 3 * np.cos(joints[2])) - np.cos(joints[0]) * np.sin(joints[1]) * (2 * np.sin(joints[2] + joints[3]) + 3 * np.sin(joints[2]))
-        z_e = np.cos(joints[1]) * np.sin(joints[2]) * (2 * np.cos(joints[3] + 3)) + 2 * (np.sin(joints[3]) * np.cos(joints[1]) * np.cos(joints[2]) + 1)
+        s1 = np.sin(joints[0])
+        c1 = np.cos(joints[0])
+        s2 = np.sin(joints[1])
+        c2 = np.cos(joints[1])
+        s3 = np.sin(joints[2])
+        c3 = np.cos(joints[2])
+        s4 = np.sin(joints[3])
+        c4 = np.cos(joints[3])
+        x_e = (-c1*s3+s1*s2*c3)*(2*c4+3)+2*s4*(-s1*s2*s3-c1*c3)
+        y_e = (-s1*s3-c1*s2*c3)*(2*c4+3)+2*s4*(-c1*s2*s3+s1*c3)
+        z_e = c2 * c3 * (2 * c4 + 3) + 2 * (- s4 * c2 * s3 + 1)
         end_effector = np.array([x_e, y_e, z_e])
         return end_effector
-    
-    
-    def calculate_fk_new(self, joints):
+
+
+    def calculate_fk_version2_wrong(self, joints):
         # uses second set of DH params
         x_e = np.cos(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3) - np.sin(joints[0]) * np.sin(joints[2]) * (2 * np.cos(joints[3]) + 3) - 2 * np.sin(joints[1]) * np.sin(joints[3]) * np.cos(joints[0])
         y_e = np.sin(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3) + np.sin(joints[2]) * np.cos(joints[0]) * (2 * np.cos(joints[3]) + 3) - 2 * np.sin(joints[0]) * np.sin(joints[1]) * np.sin(joints[3])
