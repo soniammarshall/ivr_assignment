@@ -21,7 +21,7 @@ class joint_angles_estimator:
         self.joint_angles = Float64MultiArray()
         self.joint_angles_history = np.array([0.5, 0.5, 0.5, 0.5])
 
-    # Receive target data from both cameras, process it, and publish
+    # Receive target data from blob estimator, calculate joint angles and publish them
     def callback(self, blobs):
         if len(blobs.data) == 0:
             received_blobs = self.blobs_history
