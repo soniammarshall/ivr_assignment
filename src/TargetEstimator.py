@@ -1,15 +1,17 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import sys
 import cv2
 import rospy
 import numpy as np
-import vision as vis
+import visionlib as vis
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64, Float64MultiArray
 from cv_bridge import CvBridge, CvBridgeError
 
-class target_estimator:
+
+class TargetEstimator:
 
     # Defines publisher and subscriber
     def __init__(self):
@@ -84,9 +86,10 @@ class target_estimator:
         # Publish the results
         self.target_position.data[1] = vis.to_meters_ratio_img1 * sphere_relative_distance[0]
         self.target_position.data[2] = vis.to_meters_ratio_img1 * sphere_relative_distance[1]
-        print("Y={}, Z={}".format(self.target_position.data[1], self.target_position.data[2]))
+        print("Target position: X={0:.2f}, Y={1:.2f}, Z={2:.2f}".format(self.target_position.data[0],
+                                                                        self.target_position.data[1],
+                                                                        self.target_position.data[2]), end='\r')
         self.target_position_pub.publish(self.target_position)
-
 
     def image2_callback(self, data):
         try:
@@ -112,13 +115,12 @@ class target_estimator:
 
         # Publish the results
         self.target_position.data[0] = vis.to_meters_ratio_img2 * sphere_relative_distance[0]
-        print("X={}".format(self.target_position.data[0]))
         self.target_position_pub.publish(self.target_position)
 
 
 # call the class
 def main(args):
-    te = target_estimator()
+    te = TargetEstimator()
     try:
         rospy.spin()
     except KeyboardInterrupt:

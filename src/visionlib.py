@@ -8,7 +8,8 @@ to_meters_ratio_img2 = 0.04311306135592269  # Precomputed with vis.pixel2meter(y
 # Precomputed with detect_blob_center(cv2.inRange(self.cv_image2, (0, 100, 100), (80, 255, 255))) in image 2, when orange sphere was not interfering
 yellow_blob_center_img2 = np.array([399, 533])
 yellow_blob_center_img1 = np.array([399, 533])
-sphere_template = cv2.imread("src/ivr_assignment/src/sphere.png", 0)
+sphere_template = cv2.imread("src/ivr_assignment/src/templates/sphere.png", 0)
+
 
 # Detecting the centre of a colored circle
 def detect_blob_center(mask):  # mask isolates the color in the image as a binary image
@@ -24,7 +25,7 @@ def detect_blob_center(mask):  # mask isolates the color in the image as a binar
     return np.array([cx, cy])
 
 
-# Calculate the conversion from pixel to meter
+# Calculate the conversion from pixels to meters
 def pixel2meter(yellow_mask, blue_mask):
     yellow_joint = detect_blob_center(yellow_mask)
     blue_joint = detect_blob_center(blue_mask)

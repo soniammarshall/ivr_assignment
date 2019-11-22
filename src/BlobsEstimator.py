@@ -5,13 +5,13 @@ import sys
 import cv2
 import rospy
 import numpy as np
-import vision as vis
+import visionlib as vis
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray, Float64
 from cv_bridge import CvBridge, CvBridgeError
 
 
-class blobs_estimator:
+class BlobsEstimator:
 
     # Defines publisher and subscriber
     def __init__(self):
@@ -116,19 +116,19 @@ class blobs_estimator:
         # cv2.waitKey(3)
 
         # Visualize red blob
-        x_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], base_frame[1]), color=(255, 255, 255))
-        z_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (base_frame[0], red_detected[1]), color=(255, 255, 255))
-        center_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], red_detected[1]), color=(255, 255, 255))
-        cv2.imshow('Visualization Image 1, Target ZY, Red Blob', red_mask)
-        # cv2.imshow('Original Image 1, Target ZX', self.cv_image2)
-        cv2.waitKey(3)
+        # x_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], base_frame[1]), color=(255, 255, 255))
+        # z_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (base_frame[0], red_detected[1]), color=(255, 255, 255))
+        # center_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], red_detected[1]), color=(255, 255, 255))
+        # cv2.imshow('Visualization Image 1, Target ZY, Red Blob', red_mask)
+        # # cv2.imshow('Original Image 1, Target ZX', self.cv_image2)
+        # cv2.waitKey(3)
 
         self.blobs.data = new_blobs
         self.blob_pub.publish(self.blobs)
 
 # call the class
 def main(args):
-    be = blobs_estimator()
+    be = BlobsEstimator()
     try:
         rospy.spin()
     except KeyboardInterrupt:
