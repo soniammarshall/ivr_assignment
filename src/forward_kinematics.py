@@ -19,9 +19,8 @@ class forward_kinematics:
         self.end_effector_pub = rospy.Publisher("/end_effector_position", Float64MultiArray, queue_size=10)
         self.end_effector_position = Float64MultiArray()
         self.blobs_history = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        self.pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421
         # input the joint angles here for which you want to calculate FK
-        self.joints = np.array([0.0, self.pi/2, 0.0, 0.0])
+        self.joints = np.array([0.3, 0.4, 0.6, 0.7])
 
 
     def callback(self, blobs):

@@ -116,12 +116,12 @@ class blobs_estimator:
         # cv2.waitKey(3)
 
         # Visualize red blob
-        # x_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], base_frame[1]), color=(255, 255, 255))
-        # z_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (base_frame[0], red_detected[1]), color=(255, 255, 255))
-        # center_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], red_detected[1]), color=(255, 255, 255))
-        # cv2.imshow('Visualization Image 1, Target ZY, Red Blob', red_mask)
-        # # cv2.imshow('Original Image 1, Target ZX', self.cv_image2)
-        # cv2.waitKey(3)
+        x_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], base_frame[1]), color=(255, 255, 255))
+        z_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (base_frame[0], red_detected[1]), color=(255, 255, 255))
+        center_line = cv2.line(red_mask, (base_frame[0], base_frame[1]), (red_detected[0], red_detected[1]), color=(255, 255, 255))
+        cv2.imshow('Visualization Image 1, Target ZY, Red Blob', red_mask)
+        # cv2.imshow('Original Image 1, Target ZX', self.cv_image2)
+        cv2.waitKey(3)
 
         self.blobs.data = new_blobs
         self.blob_pub.publish(self.blobs)
