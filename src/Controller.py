@@ -26,7 +26,7 @@ class Controller:
         # inititalize variables
         self.end_effector_position = np.array([0.0, 0.0, 7.0])
         self.target_position = np.array([0.0, 0.0, 0.0])
-        self.joint_angles = np.array([0.0, 0.0, 0.0, 0.5])
+        self.joint_angles = np.array([0.0, 0.0, 0.0, 0.0])
         self.joint1 = Float64()
         self.joint2 = Float64()
         self.joint3 = Float64()
@@ -55,6 +55,7 @@ class Controller:
         self.joint_angles[0] = joints.data[0]
         self.joint_angles[1] = joints.data[1]
         self.joint_angles[2] = joints.data[2]
+        self.joint_angles[3] = joints.data[3]
         # print("old: {}".format(self.joint_angles))
 
         # calculate the new joint angles using closed-loop control
@@ -146,6 +147,8 @@ class Controller:
 # call the class
 def main(args):
     ctrl = Controller()
+    # Testing only:
+    # ctrl.move_robot(np.array([0.0, 0.5, 0.5, 0.5]))
     try:
         rospy.spin()
     except KeyboardInterrupt:

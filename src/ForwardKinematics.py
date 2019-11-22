@@ -21,7 +21,7 @@ class ForwardKinematics:
         self.end_effector_position = Float64MultiArray()
         self.blob_positions = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         # input the joint angles here for which you want to calculate FK
-        self.joints = np.array([0.3, 0.4, 0.6, 0.7])
+        self.joints = np.array([0.23, 0.21, 0.32, 0.05])
 
     def callback_update_blob_positions(self, blobs):
         if len(blobs.data) == 0:
@@ -32,7 +32,7 @@ class ForwardKinematics:
 
         # print("Vision\tx: {}, y:{}, z:{}".format(received_blobs[9], received_blobs[10], received_blobs[11]), end='\r')
         end_effector = self.calculate_fk(self.joints)
-        print("FK\tx: {}, y: {}, z: {}".format(end_effector[0], end_effector[1], end_effector[2]), end='\r')
+        print("FK\tx: {0:.2f}, y: {1:.2f}, z: {2:.2f}".format(end_effector[0], end_effector[1], end_effector[2]), end='\r')
         self.end_effector_position.data = end_effector
         self.end_effector_pub.publish(self.end_effector_position)
 

@@ -76,8 +76,12 @@ class BlobsEstimator:
         # # cv2.imshow('Original Image 1, Target ZY', self.cv_image1)
         # cv2.waitKey(3)
 
-        print("YE:({0:.1f}, {1:0.2f}, {2:.2f}), BL:({3:.2f}, {4:.2f}, {5:.2f}), GR:({6:.2f}, {7:.2f}, {8:.2f}), RE:({9:.2f}, {10:.2f}, {11:.2f})".format(new_blobs[0], new_blobs[1], new_blobs[2], new_blobs[3], new_blobs[4], new_blobs[5], new_blobs[6], new_blobs[7], new_blobs[8], new_blobs[9], new_blobs[10], new_blobs[11]), end='\r')
-
+        print("YE:({0:.1f}, {1:0.2f}, {2:.2f}), BL:({3:.2f}, {4:.2f}, {5:.2f}), GR:({6:.2f}, {7:.2f}, {8:.2f}), "
+              "RE:({9:.2f}, {10:.2f}, {11:.2f})".format(new_blobs[0], new_blobs[1], new_blobs[2],
+                                                        new_blobs[3], new_blobs[4], new_blobs[5],
+                                                        new_blobs[6], new_blobs[7], new_blobs[8],
+                                                        new_blobs[9], new_blobs[10], new_blobs[11]),
+              end='\r')
 
     def image2_callback(self, data):
         try:
@@ -125,6 +129,7 @@ class BlobsEstimator:
 
         self.blobs.data = new_blobs
         self.blob_pub.publish(self.blobs)
+
 
 # call the class
 def main(args):
