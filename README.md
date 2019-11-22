@@ -6,10 +6,10 @@ blobs_estimator.py \
 target_estimator.py \
 joint_angles_estimator.py 
 
-In addition to these nodes, to get the results of forward kinematics please run:
+then, to get the results of forward kinematics please run:
 
 forward_kinematics.py 
 
-and to move the robot please run:
+and finally, to move the robot please run:
 
 controller.py
