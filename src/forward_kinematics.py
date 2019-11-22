@@ -55,19 +55,6 @@ class forward_kinematics:
         return end_effector
 
 
-    def calculate_fk_version2_wrong(self, joints):
-        # uses second set of DH params
-        x_e = np.cos(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3) - np.sin(joints[0]) * np.sin(joints[2]) * (2 * np.cos(joints[3]) + 3) - 2 * np.sin(joints[1]) * np.sin(joints[3]) * np.cos(joints[0])
-        y_e = np.sin(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3) + np.sin(joints[2]) * np.cos(joints[0]) * (2 * np.cos(joints[3]) + 3) - 2 * np.sin(joints[0]) * np.sin(joints[1]) * np.sin(joints[3])
-        z_e = 2 * (1 - np.sin(joints[3]) * np.cos(joints[1])) - np.sin(joints[1]) * np.cos(joints[2]) * (2 * np.cos(joints[3]) + 3)
-        # green joint pos:
-        # x_e = 3 * np.cos(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) - 3 * np.sin(joints[0]) * np.sin(joints[2])
-        # y_e = 3 * np.sin(joints[0]) * np.cos(joints[1]) * np.cos(joints[2]) + 3 * np.cos(joints[0]) * np.sin(joints[2])
-        # z_e = - (3 * np.sin(joints[1]) * np.cos(joints[2])) + 2
-        end_effector = np.array([x_e, y_e, z_e])
-        return end_effector
-
-
 # call the class
 def main(args):
     fk = forward_kinematics()

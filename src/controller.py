@@ -56,14 +56,15 @@ class controller:
         self.joint_angles[0] = joints.data[0]
         self.joint_angles[1] = joints.data[1]
         self.joint_angles[2] = joints.data[2]
-        # print(self.joint_angles)
+        print("old: {}".format(self.joint_angles))
 
         # calculate the new joint angles using closed-loop control
         # uncomment this line when Jacobian is implemented
-        # new_joint_angles = self.control_closed()
+        new_joint_angles = self.control_closed()
+        print("new: {}".format(new_joint_angles))
 
         # this is temporary while we don't have the actual joint angles
-        new_joint_angles = [0.0, 0.0, 0.0, 0.0]
+        # new_joint_angles = [0.0, 0.0, 0.0, 0.0]
         # move the robot to the new joint angles
         self.move_robot(new_joint_angles)
 
@@ -84,8 +85,31 @@ class controller:
 
 
     def calculate_jacobian(self, joints):
-        # TODO implement this
-        jacobian = np.array([])
+        s1 = np.sin(joints[0])
+        c1 = np.cos(joints[0])
+        s2 = np.sin(joints[1])
+        c2 = np.cos(joints[1])
+        s3 = np.sin(joints[2])
+        c3 = np.cos(joints[2])
+        s4 = np.sin(joints[3])
+        c4 = np.cos(joints[3])
+        jacobian = np.zeros((3, 4))
+
+        jacobian[0, 0] = 2*s3*c4*s1 + 3*s1*s3 + 2*c1*s2*c3*c4 + 3*c1*s2*c3 - 2*c1*s2*s3*s4 + 2*s4*s1*c3
+        jacobian[0, 1] = 2*s1*c2*c3*c4 + 3*s1*c2*c3 - 2*s1*c2*s3*s4
+        jacobian[0, 2] = -2*c3*c1*c4 - 3*c1*c3 -2*s1*s2*s3*c4 - 3*s1*s2*s3 - 2*s1*s2*c3*s4 + 2*s4*c1*s3
+        jacobian[0, 3] = 2*s3*c1*s4 - 2*s1*s2*c3*s4 - 2*s1*s2*s3*c4 - 2*c4*c1*c3
+
+        jacobian[1, 0] = -2*c4*c1*s3 - 3*c1*s3 + 2*c4*s1*s2*c3 + 3*s1*s2*c3 + 2*s4*s1*s2*s3 + 2*s4*c1*c3
+        jacobian[1, 1] = -2*c4*c1*c2*c3 - 3*c1*c2*c3 - 2*s4*c1*c2*s3
+        jacobian[1, 2] = -2*c4*s1*c3 - 3*s1*c3 + 2*c4*c1*s2*s3 + 3*c1*s2*s3 - 2*s4*c1*s2*c3 - 2*s4*s1*s3
+        jacobian[1, 3] = 2*s4*s1*s3 + 2*s4*c1*s2*c3 - 2*c4*c1*s2*s3 + 2*c4*s1*c3
+
+        jacobian[2, 0] = 0
+        jacobian[2, 1] = -2*s2*c3*c4 - 3*s2*c3 + 2*s4*s2*s3
+        jacobian[2, 2] = -2*c2*s3*c4 - 3*c2*s3 - 2*s4*c2*c3
+        jacobian[2, 3] = -2*c2*c3*s4 - 2*c4*c2*s3
+
         return jacobian
 
 
