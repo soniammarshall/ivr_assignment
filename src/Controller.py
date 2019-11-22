@@ -105,7 +105,7 @@ class Controller:
 
     def control_closed(self):
         # P gain
-        k_p = np.array([[0.1, 0, 0], [0, 0.1, 0], [0, 0, 0.1]])
+        k_p = np.array([[5, 0, 0], [0, 5, 0], [0, 0, 5]])
 
         # D gain
         k_d = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
